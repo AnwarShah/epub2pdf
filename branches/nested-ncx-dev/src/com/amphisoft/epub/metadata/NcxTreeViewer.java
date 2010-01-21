@@ -51,10 +51,41 @@ public class NcxTreeViewer {
                 frame.setVisible(true);
             }
         }
-                              );
+        );
 
     }
 
+    private final TreeModel ncxTree;
+    
+    NcxTreeViewer() {
+    	ncxTree = null;
+    }
+    public NcxTreeViewer(TreeModel treeIn) {
+    	ncxTree = treeIn;
+    }
+    
+    public void launch() {
+    	EventQueue.invokeLater(new Runnable() {
+    		public void run() {
+    			NcxTreeFrame frame = 
+    				new NcxTreeFrame(ncxTree);
+                frame.setBounds(100, 100, 300, 600);
+                frame.setVisible(true);
+    		}
+    	});
+    	/*
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                NcxTreeFrame frame = 
+                	new NcxTreeFrame(ncxTree);
+                }
+                frame.setBounds(100, 100, 300, 600);
+                frame.setVisible(true);
+            }
+        }
+        );
+        */    	
+    }
 }
 
 class NcxTreeFrame extends JFrame {
@@ -83,7 +114,13 @@ class NcxTreeFrame extends JFrame {
         init(ncx);
     }
 
-    private void init(Ncx ncx) {
+    public NcxTreeFrame(TreeModel ncxTree) {
+    	treeModel = ncxTree;
+    	treeView = new JTree(ncxTree);
+        this.getContentPane().add(new JScrollPane(treeView), BorderLayout.CENTER);
+	}
+
+	private void init(Ncx ncx) {
         initTree(ncx);
         this.getContentPane().add(new JScrollPane(treeView), BorderLayout.CENTER);
     }

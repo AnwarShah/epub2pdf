@@ -18,6 +18,7 @@ along with epub2pdf.  If not, see <http://www.gnu.org/licenses/>.
 */
 package com.amphisoft.epub2pdf.content;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -25,6 +26,7 @@ import java.util.TreeSet;
 import com.amphisoft.epub2pdf.style.StyleSpecText;
 import com.amphisoft.pdf.ITAlignment;
 import com.lowagie.text.Anchor;
+import com.lowagie.text.ExceptionConverter;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.FontFactoryImp;
@@ -105,9 +107,7 @@ public class TextFactory {
         FontFactory.registerDirectory("lib/fonts",true);
 
         defaultFont = FontFactory.getFont("helvetica");
-        //.getFont("Calibri", FontFactory.defaultEncoding, BaseFont.EMBEDDED);
         defaultFontMono = FontFactory.getFont("courier");
-        //.getFont("Consolas", FontFactory.defaultEncoding, BaseFont.EMBEDDED);
         defaultFont.setSize(defaultFontSize);
         defaultFontMono.setSize(defaultFontMonoSize);
     }
@@ -222,7 +222,17 @@ public class TextFactory {
     public static boolean setDefaultFontByName(String fontName) {
         fontName = fontName.toLowerCase().trim();
         if (TextFactory.fontFamilyRegistered(fontName)) {
-            Font newDefaultFont = FontFactory.getFont(fontName, FontFactory.defaultEncoding, BaseFont.EMBEDDED);
+            Font newDefaultFont = null;
+            try {
+            	newDefaultFont = FontFactory.getFont(fontName, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+            } catch (ExceptionConverter eC) {
+            	if(eC.getException() instanceof UnsupportedEncodingException) {
+            		newDefaultFont = FontFactory.getFont(fontName, FontFactory.defaultEncoding, BaseFont.EMBEDDED);
+            	}
+            	else {
+            		throw new RuntimeException(eC);
+            	}
+            }
             newDefaultFont.setSize(defaultFontSize);
             defaultFont = newDefaultFont;
             return true;

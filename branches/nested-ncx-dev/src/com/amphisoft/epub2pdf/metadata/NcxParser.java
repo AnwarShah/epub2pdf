@@ -29,27 +29,54 @@ import com.amphisoft.epub.metadata.Ncx;
  *
  */
 public class NcxParser {
-    private Ncx ncxSource;
+	private Ncx ncxSource;
 
-    public NcxParser() {}
+	public NcxParser() {}
 
-    public NcxParser(Ncx ncx) {
-        setSource(ncx);
-    }
+	public NcxParser(Ncx ncx) {
+		setSource(ncx);
+	}
 
-    public void setSource(Ncx ncx) {
-        if (ncxSource == null) {
-            ncxSource = ncx;
-        } else {
-            throw new IllegalArgumentException(
-                "This NcxParser is already bound to an Ncx instance");
-        }
-    }
+	public void setSource(Ncx ncx) {
+		if (ncxSource == null) {
+			ncxSource = ncx;
+		} else {
+			throw new IllegalArgumentException(
+			"This NcxParser is already bound to an Ncx instance");
+		}
+	}
 
-    // called first by the (as-yet unwritten) query methods
-    void checkBoundState() {
-        if (ncxSource == null) {
-            throw new IllegalStateException("Attempted to query an unbound NcxParser");
-        }
-    }
+	public TocTree buildTocTree() {
+		TocTree tocTree = new TocTree();
+		if(ncxSource != null) {
+			for(Ncx.NavPoint nP : ncxSource.getNavPointsNested()) {
+				addNavPoint(nP, tocTree);
+			}
+		}
+		return tocTree;
+	}
+
+	private void addNavPoint(Ncx.NavPoint nP, TocTree tree) {
+		addNavPoint(nP, tree, null);
+	}
+
+	private void addNavPoint(Ncx.NavPoint nP, TocTree tree, TocTreeNode parent) {
+		if(parent == null) {
+			parent = tree.getRoot();
+		}
+		TocTreeNode child = new TocTreeNode();
+		child.setNcxNavPoint(nP);
+		parent.add(child);
+
+		for(Ncx.NavPoint childNP : nP.children()) {
+			addNavPoint(childNP, tree, child);
+		}
+	}
+
+	// called first by the (as-yet unwritten) query methods
+	void checkBoundState() {
+		if (ncxSource == null) {
+			throw new IllegalStateException("Attempted to query an unbound NcxParser");
+		}
+	}
 }
